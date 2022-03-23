@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v2
-        with: 
+        with:
           node-version: '16'
       - name: npm install
         run: npm install
@@ -35,8 +35,21 @@ jobs:
         uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: "fullstackopencicd"
+          heroku_app_name: 'fullstackopencicd'
           heroku_email: ${{secrets.HEROKU_EMAIL}}
-          healthcheck: "https://fullstackopencicd.herokuapp.com/health"
-          checkstring: "ok"
+          healthcheck: 'https://fullstackopencicd.herokuapp.com/health'
+          checkstring: 'ok'
           rollbackonhealthcheckfailed: true
+  tag_release:
+    needs: [simple_deployment_pipeline]
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        fetch-depth: '0'
+      - name: Bump version and push tag
+        if: ${{ github.event_name == 'push' }}
+        uses: anothrNick/github-tag-action@1.36.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DEFAULT_BUMP: patch
